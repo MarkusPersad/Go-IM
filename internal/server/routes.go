@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
@@ -14,15 +13,9 @@ func (s *FiberServer) RegisterFiberRoutes() {
 		AllowCredentials: false, // credentials require explicit origins
 		MaxAge:           300,
 	}))
-
-	s.App.Get("/", s.HelloWorldHandler)
-
-}
-
-func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
-	resp := fiber.Map{
-		"message": "Hello World",
-	}
-
-	return c.JSON(resp)
+	s.Get("/health", s.HealthHandler)
+	api := s.Group("/api")
+	accout := api.Group("/account")
+	accout.Get("/getcaptcha", s.GetCaptcha)
+	accout.Get("/register", s.RegisterHandler)
 }

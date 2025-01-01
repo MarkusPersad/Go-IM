@@ -71,6 +71,16 @@ func (h *Handlers) RegisterHandler(c *fiber.Ctx) error {
 	return c.JSON(resp.Success(0, "注册成功", nil))
 }
 
+// LoginHandler godoc
+// @Summary		用户登录
+// @Description	用户登录接口，接收用户登录信息并返回登录结果
+// @Tags			账户管理
+// @Accept			json
+// @Produce		json
+// @Param			login	body		request.Login	true	"登录信息"
+// @Success		200	{object}	resp.Response	"登录成功通知"
+// @Failure		1003	{object}	error		"登录失败"
+// @Router			/api/account/login [get]
 func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 	var login request.Login
 	if e := c.BodyParser(&login); e != nil {
@@ -83,6 +93,13 @@ func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 	if e := capt.Verify(login.CheckCodeKey, login.CheckCode, true); e != nil {
 		return e
 	}
-
+	var user model.User
+	if h.db.GetDB().Model(&user).Where("email = ?", login.Email).First(&user).Error != nil {
+		return err.NotFound
+	}
+	if !giutils.CompareHashPassword(user.Password, login.Password) {
+		return err.PassError
+	}
+	//TODO Valkey数据库记录Token
 	return nil
 }

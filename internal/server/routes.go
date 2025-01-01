@@ -18,4 +18,5 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	accout := api.Group("/account")
 	accout.Get("/getcaptcha", s.GetCaptcha)
 	accout.Get("/register", s.RegisterHandler)
+	accout.Get("/login", s.LoginHandler)
 }

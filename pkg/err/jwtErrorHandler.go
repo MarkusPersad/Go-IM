@@ -8,10 +8,10 @@ import (
 func JwtErrorHandler(c *fiber.Ctx, err error) error {
 	switch err {
 	case jwt.ErrTokenExpired:
-		return Timeout
+		return c.Status(fiber.StatusOK).JSON(Timeout)
 	case jwt.ErrTokenInvalidAudience, jwt.ErrTokenInvalidIssuer, jwt.ErrTokenInvalidSubject, jwt.ErrTokenInvalidId, jwt.ErrTokenInvalidClaims:
-		return TokenInvalid
+		return c.Status(fiber.StatusOK).JSON(TokenInvalid)
 	default:
-		return fiber.ErrInternalServerError
+		return c.Status(fiber.StatusOK).JSON(fiber.ErrInternalServerError)
 	}
 }

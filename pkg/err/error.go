@@ -7,6 +7,8 @@ var (
 	UserExists   = NewError(1003, "用户已存在")
 	CheckCode    = NewError(1004, "验证码错误")
 	Timeout      = NewError(1005, "登陆超时")
+	NotFound     = NewError(1006, "未找到")
+	PassError    = NewError(1007, "密码错误")
 )
 
 type PersonalError struct {

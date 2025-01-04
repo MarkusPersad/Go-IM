@@ -19,4 +19,5 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	accout.Get("/getcaptcha", s.GetCaptcha)
 	accout.Get("/register", s.RegisterHandler)
 	accout.Get("/login", s.LoginHandler)
+	accout.Get("/getuserinfo", s.GetUserInfoHandler)
 }

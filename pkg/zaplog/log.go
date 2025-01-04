@@ -1,6 +1,7 @@
 package zaplog
 
 import (
+	"fmt"
 	"github.com/cilium/lumberjack/v2"
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
@@ -22,8 +23,10 @@ func NewLogger() *zap.Logger {
 	maxBackups, _ := strconv.Atoi(os.Getenv("LOG_MAX_BACKUPS"))
 	isCompress, _ := strconv.ParseBool(os.Getenv("LOG_COMPRESS"))
 	lv := os.Getenv("LOG_LEVEL")
+	currentDate := time.Now().Format("2006-01-02")               // 格式化为 YYYY-MM-DD
+	logFileName := fmt.Sprintf("./logs/log-%s.log", currentDate) // 例如 log-2025-01-04.log
 	hook := lumberjack.Logger{
-		Filename:   os.Getenv("LOG_FILE"),
+		Filename:   logFileName,
 		MaxSize:    maxSize,
 		MaxAge:     maxAge,
 		MaxBackups: maxBackups,

@@ -9,6 +9,7 @@ var (
 	Timeout      = NewError(1005, "登陆超时")
 	NotFound     = NewError(1006, "未找到")
 	PassError    = NewError(1007, "密码错误")
+	TokenNull    = NewError(1008, "Token为空")
 )
 
 type PersonalError struct {

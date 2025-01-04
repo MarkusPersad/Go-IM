@@ -3,6 +3,7 @@ package server
 import (
 	"Go-IM/internal/handler"
 	"Go-IM/internal/model"
+	"Go-IM/pkg/common/customtypes"
 	"Go-IM/pkg/err"
 	"Go-IM/pkg/zaplog"
 	"github.com/gofiber/contrib/fiberzap/v2"
@@ -54,6 +55,7 @@ func New() *FiberServer {
 		ContextKey:  "UserInfo",
 		TokenLookup: "header:Authorization",
 		AuthScheme:  "Bearer",
+		Claims:      customtypes.GIClaims{},
 	}))
 	server.InitDBTables(&model.User{}, &model.Group{}, &model.GroupMember{}, &model.Message{}, &model.UserFriend{})
 	return server

@@ -30,7 +30,7 @@ func (h *Handlers) InitDBTables(tables ...interface{}) {
 	if len(tables) == 0 {
 		return
 	}
-	e := h.db.GetDB().AutoMigrate(tables...)
+	e := h.db.GetDB(nil).AutoMigrate(tables...)
 	if e != nil {
 		zaplog.Logger.Fatal("init db tables failed", zap.Error(e))
 	}

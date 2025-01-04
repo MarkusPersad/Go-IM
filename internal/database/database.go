@@ -4,6 +4,7 @@ import (
 	"Go-IM/pkg/zaplog"
 	"context"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/valkey-io/valkey-go"
 	"go.uber.org/zap"
@@ -37,8 +38,10 @@ type Service interface {
 	Set(id string, value string) error
 	Get(id string, clear bool) string
 	Verify(id, answer string, clear bool) bool
-	GetDB() *gorm.DB
+	GetDB(c *fiber.Ctx) *gorm.DB
 	GetValClient() valkey.Client
+	SetAndTime(key, value string, timeout int64) error
+	GetValue(key string) string
 }
 
 type service struct {
@@ -160,7 +163,25 @@ func parseValkeyInfo(info string) map[string]string {
 	return result
 }
 
-func (s *service) GetDB() *gorm.DB {
+// GetDB 返回与当前请求相关的数据库事务对象。
+// 在fiber框架的上下文中，此函数检查是否存在当前事务对象，
+// 如果存在则返回它，否则将服务的数据库对象存储在上下文中并返回。
+// 这对于在处理请求时管理数据库事务非常有用，确保了事务的正确性和一致性。
+func (s *service) GetDB(c *fiber.Ctx) *gorm.DB {
+	// 检查传入的上下文是否不为空，为获取局部变量做准备。
+	if c != nil {
+		// 尝试从上下文中获取名为"Tx"的局部变量，并断言其为gorm.DB类型。
+		// 如果成功获取并断言，说明当前请求已经关联了一个事务对象，直接返回该对象。
+		if tx, ok := c.Locals("Tx").(*gorm.DB); ok {
+			return tx
+		}
+		// 如果上述尝试失败，说明当前请求尚未关联事务对象，
+		// 此时将服务的数据库对象存储为上下文的局部变量"Tx"，以供后续使用。
+		c.Locals("Tx", s.db)
+	}
+	// 无论上下文是否存在，最终返回服务的数据库对象。
+	// 如果上下文中已经有关联的事务对象，之前已经返回，此处不会执行。
+	// 如果没有，此处返回服务的数据库对象，确保了函数总有返回值。
 	return s.db
 }
 

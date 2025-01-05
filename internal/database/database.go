@@ -30,6 +30,7 @@ var (
 	valPort          = os.Getenv("VALKEY_CLIENT_PORT")
 	valPass          = os.Getenv("VALKEY_CLIENT_PASS")
 	dbInstance       Service
+	ctxTxKey         = "Tx"
 )
 
 type Service interface {
@@ -42,6 +43,7 @@ type Service interface {
 	GetValClient() valkey.Client
 	SetAndTime(key, value string, timeout int64) error
 	GetValue(key string) string
+	DelValue(key string) error
 }
 
 type service struct {
@@ -172,7 +174,7 @@ func (s *service) GetDB(c *fiber.Ctx) *gorm.DB {
 	if c != nil {
 		// 尝试从上下文中获取名为"Tx"的局部变量，并断言其为gorm.DB类型。
 		// 如果成功获取并断言，说明当前请求已经关联了一个事务对象，直接返回该对象。
-		if tx, ok := c.Locals("Tx").(*gorm.DB); ok {
+		if tx, ok := c.Locals(ctxTxKey).(*gorm.DB); ok {
 			return tx
 		}
 		// 如果上述尝试失败，说明当前请求尚未关联事务对象，

@@ -20,4 +20,5 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	accout.Get("/register", s.RegisterHandler)
 	accout.Get("/login", s.LoginHandler)
 	accout.Get("/getuserinfo", s.GetUserInfoHandler)
+	accout.Get("/logout", s.LogOutHandler)
 }

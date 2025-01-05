@@ -11,6 +11,8 @@ import (
 	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"os"
 )
 
@@ -34,6 +36,7 @@ func New() *FiberServer {
 	}
 	server.Use(fiberzap.New(fiberzap.Config{
 		Logger: zaplog.Logger,
+		Levels: []zapcore.Level{zap.DebugLevel, zap.InfoLevel, zap.InfoLevel, zap.WarnLevel, zap.ErrorLevel},
 	}))
 	server.Use(swagger.New(swagger.Config{
 		Next:     nil,

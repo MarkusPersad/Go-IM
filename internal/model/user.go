@@ -13,5 +13,6 @@ type User struct {
 	Nickname string `json:"nickname" gorm:"comment:'昵称'"`
 	Avatar   string `json:"avatar" gorm:"type:varchar(150);comment:'头像'"`
 	Email    string `json:"email" gorm:"type:varchar(80);column:email;comment:'邮箱'"`
+	Status   int8   `json:"status" gorm:"type:tinyint;default:1;column:status;comment:'状态'"`
 	Version  optimisticlock.Version
 }

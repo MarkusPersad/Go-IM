@@ -5,6 +5,7 @@ import (
 	"Go-IM/pkg/captcha"
 	"Go-IM/pkg/common/customtypes"
 	"Go-IM/pkg/common/defines"
+	"Go-IM/pkg/common/enum"
 	"Go-IM/pkg/common/request"
 	"Go-IM/pkg/common/resp"
 	"Go-IM/pkg/err"
@@ -107,6 +108,9 @@ func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 	if !giutils.CompareHashPassword(user.Password, login.Password) {
 		return err.PassError
 	}
+	if e := h.db.GetDB(c).Model(&user).Where("uuid = ?", user.Uuid).Update("status", enum.LogIn).Error; e != nil {
+		return e
+	}
 	claims := customtypes.GIClaims{
 		UserId: user.Uuid,
 		Admin:  false,
@@ -134,6 +138,7 @@ func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 // @Summary		获取用户信息
 // @Description	获取用户信息接口，返回用户信息
 // @Tags			账户管理
+// @Param Authorization header string true "Bearer Token"
 // @Accept			json
 // @Produce		json
 // @Success		200	{object}	resp.Response	"获取用户信息成功"
@@ -142,7 +147,6 @@ func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 func (h *Handlers) GetUserInfoHandler(c *fiber.Ctx) error {
 	user := c.Locals("UserInfo").(*jwt.Token)
 	claims := user.Claims.(*customtypes.GIClaims)
-	zaplog.Logger.Info("GetUserInfoHandler", zap.Any("userId", claims.UserId))
 	if value := h.db.GetValue(defines.USER_TOKEN_KEY + claims.UserId); value == "" {
 		return err.TokenInvalid
 	}
@@ -151,4 +155,31 @@ func (h *Handlers) GetUserInfoHandler(c *fiber.Ctx) error {
 		return err.NotFound
 	}
 	return c.JSON(resp.Success(0, "获取用户信息成功", userInfo))
+}
+
+// LogOutHandler godoc
+// @Summary 用户登出
+// @Description 用户登出并更新用户状态
+// @Tags 账户管理
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer Token"
+// @Success 200 {object} resp.Response "退出成功"
+// @Router /api/account/logout [get]
+func (h *Handlers) LogOutHandler(c *fiber.Ctx) error {
+	token := c.Locals("UserInfo").(*jwt.Token)
+	claims := token.Claims.(*customtypes.GIClaims)
+	var user model.User
+	if e := h.db.GetDB(c).Model(&user).Where("uuid = ?", claims.UserId).Update("status", enum.LogOut).Error; e != nil {
+		zaplog.Logger.Error("更新用户状态失败", zap.Error(e))
+		return e
+	}
+	if h.db.GetValue(defines.USER_TOKEN_KEY+claims.UserId) == "" {
+		return err.Timeout
+	}
+	if e := h.db.DelValue(defines.USER_TOKEN_KEY + claims.UserId); e != nil {
+		zaplog.Logger.Error("删除token失败", zap.Error(e))
+		return e
+	}
+	return c.JSON(resp.Success(0, "退出成功", nil))
 }

@@ -7,4 +7,5 @@ const (
 	PASSWORD_REGEX   = `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,32}$`
 	USER_TOKEN       = 60 * 60 * 24
 	USER_TOKEN_KEY   = "user_token"
+	TWOKEN_EXPIRE    = 24
 )

@@ -10,9 +10,11 @@ import (
 	"Go-IM/pkg/err"
 	"Go-IM/pkg/giutils"
 	"Go-IM/pkg/validates"
+	"Go-IM/pkg/zaplog"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"os"
 	"time"
 )
@@ -109,7 +111,9 @@ func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 		UserId: user.Uuid,
 		Admin:  false,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(defines.USER_TOKEN))),
+			ExpiresAt: &jwt.NumericDate{
+				Time: time.Now().Add(time.Hour * defines.TWOKEN_EXPIRE),
+			},
 		},
 	}
 	if giutils.IsAdmin(user.Email) {
@@ -137,12 +141,13 @@ func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 // @Router			/api/account/getuserinfo [get]
 func (h *Handlers) GetUserInfoHandler(c *fiber.Ctx) error {
 	user := c.Locals("UserInfo").(*jwt.Token)
-	claims := user.Claims.(customtypes.GIClaims)
+	claims := user.Claims.(*customtypes.GIClaims)
+	zaplog.Logger.Info("GetUserInfoHandler", zap.Any("userId", claims.UserId))
 	if value := h.db.GetValue(defines.USER_TOKEN_KEY + claims.UserId); value == "" {
 		return err.TokenInvalid
 	}
 	var userInfo model.User
-	if e := h.db.GetDB(c).Model(&userInfo).Where("uuid = ?", claims.UserId).First(&user).Error; e != nil {
+	if e := h.db.GetDB(c).Model(&userInfo).Where("uuid = ?", claims.UserId).First(&userInfo).Error; e != nil {
 		return err.NotFound
 	}
 	return c.JSON(resp.Success(0, "获取用户信息成功", userInfo))

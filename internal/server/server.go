@@ -45,7 +45,8 @@ func New() *FiberServer {
 	}))
 	server.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{
-			Key: []byte(os.Getenv("JWT_SECRET_KEY")),
+			JWTAlg: "HS256",
+			Key:    []byte(os.Getenv("JWT_SECRET_KEY")),
 		},
 		ErrorHandler: err.JwtErrorHandler,
 		Filter: func(ctx *fiber.Ctx) bool {
@@ -55,7 +56,7 @@ func New() *FiberServer {
 		ContextKey:  "UserInfo",
 		TokenLookup: "header:Authorization",
 		AuthScheme:  "Bearer",
-		Claims:      customtypes.GIClaims{},
+		Claims:      &customtypes.GIClaims{},
 	}))
 	server.InitDBTables(&model.User{}, &model.Group{}, &model.GroupMember{}, &model.Message{}, &model.UserFriend{})
 	return server

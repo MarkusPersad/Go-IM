@@ -37,6 +37,7 @@ func (h *Handlers) AddFriend(c *fiber.Ctx) error {
 		if e := createFriendShip(tx, friend.Uuid, claims.UserId); e != nil {
 			return e
 		}
+		//TODO 发送打招呼消息
 		return nil
 	}); e != nil {
 		return e
@@ -54,5 +55,9 @@ func createFriendShip(tx *gorm.DB, userId, friendId string) error {
 	if e := tx.Create(&userFriend).Error; e != nil {
 		return e
 	}
+	return nil
+}
+func sendMessage() error {
+	//TODO 发送消息
 	return nil
 }

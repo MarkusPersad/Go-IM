@@ -10,6 +10,7 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
+	recover2 "github.com/gofiber/fiber/v2/middleware/recover"
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -34,6 +35,11 @@ func New() *FiberServer {
 		}),
 		Handlers: handler.NewHandlers(),
 	}
+	server.Use(recover2.New(recover2.Config{
+		Next:              nil,
+		EnableStackTrace:  false,
+		StackTraceHandler: nil,
+	}))
 	server.Use(fiberzap.New(fiberzap.Config{
 		Logger: zaplog.Logger,
 		Levels: []zapcore.Level{zap.DebugLevel, zap.InfoLevel, zap.InfoLevel, zap.WarnLevel, zap.ErrorLevel},

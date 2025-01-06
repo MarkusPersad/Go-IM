@@ -54,7 +54,7 @@ func (h *Handlers) RegisterHandler(c *fiber.Ctx) error {
 	if e := c.BodyParser(&register); e != nil {
 		return err.BadRequest
 	}
-	e := validates.Validatec.Validate(&register)
+	e := validates.New().Validate(&register)
 	if e != nil {
 		return e
 	}
@@ -94,7 +94,7 @@ func (h *Handlers) LoginHandler(c *fiber.Ctx) error {
 	if e := c.BodyParser(&login); e != nil {
 		return err.BadRequest
 	}
-	if e := validates.Validatec.Validate(&login); e != nil {
+	if e := validates.New().Validate(&login); e != nil {
 		return e
 	}
 	capt := captcha.New(h.db)
@@ -170,12 +170,12 @@ func (h *Handlers) LogOutHandler(c *fiber.Ctx) error {
 	token := c.Locals("UserInfo").(*jwt.Token)
 	claims := token.Claims.(*customtypes.GIClaims)
 	var user model.User
+	if h.db.GetValue(defines.USER_TOKEN_KEY+claims.UserId) == "" {
+		return err.Timeout
+	}
 	if e := h.db.GetDB(c).Model(&user).Where("uuid = ?", claims.UserId).Update("status", enum.LogOut).Error; e != nil {
 		zaplog.Logger.Error("更新用户状态失败", zap.Error(e))
 		return e
-	}
-	if h.db.GetValue(defines.USER_TOKEN_KEY+claims.UserId) == "" {
-		return err.Timeout
 	}
 	if e := h.db.DelValue(defines.USER_TOKEN_KEY + claims.UserId); e != nil {
 		zaplog.Logger.Error("删除token失败", zap.Error(e))

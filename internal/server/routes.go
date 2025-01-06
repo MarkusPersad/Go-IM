@@ -21,4 +21,6 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	accout.Get("/login", s.LoginHandler)
 	accout.Get("/getuserinfo", s.GetUserInfoHandler)
 	accout.Get("/logout", s.LogOutHandler)
+	group := api.Group("/friend")
+	group.Get("/addfriend", s.AddFriend)
 }

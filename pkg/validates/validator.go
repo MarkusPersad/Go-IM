@@ -8,12 +8,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var Validatec *XValidator
-
-func init() {
-	Validatec = New()
-}
-
+// var Validatec *XValidator
+//
+//	func init() {
+//		Validatec = New()
+//	}
 type (
 	XValidator struct {
 		validator *validator.Validate

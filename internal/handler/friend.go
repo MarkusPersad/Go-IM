@@ -31,10 +31,10 @@ func (h *Handlers) AddFriend(c *fiber.Ctx) error {
 		if e := tx.Model(&friend).Where("username = ?", addFriend.FriendInfo).Or("email = ?", addFriend.FriendInfo).First(&friend).Error; e != nil {
 			return err.NotFound
 		}
-		var userFriend model.UserFriend
-		userFriend.UserId = claims.UserId
-		userFriend.FriendId = friend.Uuid
-		if e := tx.Create(&userFriend).Error; e != nil {
+		if e := createFriendShip(tx, claims.UserId, friend.Uuid); e != nil {
+			return e
+		}
+		if e := createFriendShip(tx, friend.Uuid, claims.UserId); e != nil {
 			return e
 		}
 		return nil
@@ -42,4 +42,17 @@ func (h *Handlers) AddFriend(c *fiber.Ctx) error {
 		return e
 	}
 	return c.JSON(resp.Success(0, "添加成功", nil))
+}
+
+func createFriendShip(tx *gorm.DB, userId, friendId string) error {
+	var userFriend model.UserFriend
+	userFriend.UserId = userId
+	userFriend.FriendId = friendId
+	if e := tx.Model(&userFriend).Where("userid = ? AND friendid = ?", userFriend.UserId, userFriend.FriendId).First(&userFriend).Error; e == nil {
+		return err.AlreadyExists
+	}
+	if e := tx.Create(&userFriend).Error; e != nil {
+		return e
+	}
+	return nil
 }

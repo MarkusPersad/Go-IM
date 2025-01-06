@@ -66,7 +66,7 @@ func (h *Handlers) RegisterHandler(c *fiber.Ctx) error {
 	var user model.User
 	e = h.db.GetDB(c).Model(&user).Where("username = ? or email = ?", register.UserName, register.Email).First(&user).Error
 	if e == nil {
-		return err.UserExists
+		return err.AlreadyExists
 	}
 	user.Uuid = uuid.New().String()
 	user.Email = register.Email

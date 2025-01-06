@@ -62,6 +62,7 @@ func New() Service {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: isSingularTable,
 		},
+		SkipDefaultTransaction: true,
 	})
 	if err != nil {
 		zaplog.Logger.Error("Failed to connect to database.", zap.Error(err))
